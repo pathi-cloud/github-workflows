@@ -1,0 +1,20 @@
+name: UI Unit
+description: |
+  Run Unit tests
+
+inputs:
+  working_directory:
+    description: |
+      Directory where unit tests will be executed. 
+      Required if unit tests are located in a directory other than repository root, e.g.  ./core
+      Defaults to root of repository.
+    required: false
+    default: ./
+
+runs:
+  using: "composite"
+  steps:
+    - name: Unit Tests
+      shell: bash
+      run: npm run test:unit --if-present
+      working-directory: ${{ inputs.working_directory }}

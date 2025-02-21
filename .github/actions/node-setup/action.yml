@@ -1,0 +1,21 @@
+name: Node Setup
+description: |
+  Setup Node, install node_modules
+
+inputs:
+  node_version:
+    type: string
+    description: Node version to install
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+
+    - name: Install dependencies
+      shell: bash
+      run: npm ci

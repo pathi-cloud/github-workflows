@@ -1,0 +1,82 @@
+# ```
+# ui-application:
+#   uses: pathi-cloud/github-workflows/.github/workflows/ci-ui-application.yml@main
+#   secrets: inherit
+#   with:
+#     cypress_start_cmd: 'npm run dev:instrument'
+#     cypress_base_url: 'http://localhost:3434'
+# ```
+
+name: CI for UI Applications
+
+on:
+  workflow_call:
+    inputs:
+      run_acceptance:
+        description: |
+          If Acceptance (or cypress) tests should be executed or not
+        required: false
+        type: boolean
+        default: true
+
+      cypress_base_url:
+        description: |
+          This is the url where cypress expects to find the application running.
+          This is the baseUrl that you set in cypress.config
+        required: false
+        type: string
+        default: "http://localhost:3000"
+
+      cypress_headed:
+        description: 'Whether or not to use headed mode'
+        required: false
+        # The cypress action assesses based on string
+        # https://github.com/cypress-io/github-action/blob/50b80e3d4460a8edc6c184d532e0f158e8f0f1b1/index.js#L321
+        type: string
+        default: "false"
+
+      cypress_start_cmd:
+        description: |
+          Command to start app before running cypress tests
+          eg. 'npm start', 'npm run start:instrument' etc
+        required: false
+        type: string
+        default: "npm run start:instrument"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+      actions: read # permission to read other github actions
+      contents: write # to create tag and checkout code
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          # we need to fetch all tags to ensure that we can properly use tag-manage.
+          fetch-depth: 0
+
+      - name: Setup Node Environment
+        uses: ./.github/actions/node-setup
+        with:
+          node_version: ${{ vars.UI_NODE_VERSION }}
+
+      - name: Audit, Lint & Format
+        uses: ./.github/actions/ui-checks
+
+      - name: Unit Tests
+        uses: ./.github/actions/ui-unit
+
+      - name: Acceptance Tests
+        if: inputs.run_acceptance
+        uses: ./.github/actions/ui-acceptance
+        with:
+          cypress_base_url: ${{ inputs.cypress_base_url }}
+          cypress_headed: ${{ inputs.cypress_headed }}
+          cypress_start_cmd: ${{ inputs.cypress_start_cmd }}
+
+      - name: Build
+        run: npm run build

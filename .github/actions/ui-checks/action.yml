@@ -1,0 +1,31 @@
+name: UI Check
+description: |
+  Run Lint, audit and format(if present)
+
+inputs:
+  working_directory:
+    description: |
+      Directory where UI Checks will be executed. 
+      Required if UI checks should be executed in a directory other than repository root, e.g.  ./core
+      Defaults to root of repository.
+    required: false
+    default: ./
+
+runs:
+  using: "composite"
+  steps:
+    - name: npm audit
+      shell: bash
+      # Not running security audit on dev-dependencies
+      run: npm audit --omit=dev
+      working-directory: ${{ inputs.working_directory }}
+
+    - name: Run lint
+      shell: bash
+      run: npm run lint --if-present
+      working-directory: ${{ inputs.working_directory }}
+
+    - name: Run format/prettier check
+      shell: bash
+      run: npm run format:check --if-present
+      working-directory: ${{ inputs.working_directory }}

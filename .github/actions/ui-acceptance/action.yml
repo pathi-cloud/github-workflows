@@ -1,0 +1,42 @@
+name: UI Cypress Test
+description: |
+  Run acceptance(or cypress) tests
+inputs:
+  cypress_base_url:
+    description: |
+      This is the url where cypress expects to find the application running.
+    required: false
+    default: "http://localhost:3000"
+  cypress_headed:
+    description: 'Whether or not to use headed mode'
+    required: false
+    default: "false"
+  cypress_start_cmd: # eg. 'npm start', 'npm start:instrument' etc
+    description: |
+      Command to start app before running cypress tests
+    required: true
+  working_directory:
+    description: |
+      Directory where cypress tests will be executed. 
+      Required if cypress tests are located in a directory other than repository root, e.g.  ./core
+      Defaults to root of repository.
+    required: false
+    default: ./
+
+runs:
+  using: "composite"
+  steps:
+    - name: Cypress Tests
+      uses: cypress-io/github-action@v6
+      env:
+        DEBUG: "@cypress/github-action"
+      with:
+        # node modules are aleady installed
+        install: false
+        start: ${{ inputs.cypress_start_cmd }}
+        browser: chrome
+        headed: ${{ inputs.cypress_headed }}
+        # This will change based on your application port
+        wait-on: ${{ inputs.cypress_base_url }}
+        wait-on-timeout: 120
+        working-directory: ${{ inputs.working_directory }}

@@ -60,19 +60,19 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Node Environment
-        uses: ./.github/actions/node-setup
+        uses: pathi-cloud/github-workflows/.github/actions/node-setup@main
         with:
           node_version: ${{ vars.UI_NODE_VERSION }}
 
       - name: Audit, Lint & Format
-        uses: ./.github/actions/ui-checks
+        uses: pathi-cloud/github-workflows/.github/actions/ui-checks@main
 
       - name: Unit Tests
-        uses: ./.github/actions/ui-unit
+        uses: pathi-cloud/github-workflows/.github/actions/ui-unit@main
 
       - name: Acceptance Tests
         if: inputs.run_acceptance
-        uses: ./.github/actions/ui-acceptance
+        uses: pathi-cloud/github-workflows/.github/actions/ui-acceptance@main
         with:
           cypress_base_url: ${{ inputs.cypress_base_url }}
           cypress_headed: ${{ inputs.cypress_headed }}

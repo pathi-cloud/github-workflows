@@ -43,6 +43,15 @@ on:
         type: string
         default: "npm run start:instrument"
 
+      gh_pages_deploy_dir:
+        description: |
+          Path to the directory for deploying to GitHub Pages (if there is a need)
+          Note: Path should be relative to repository root
+          For example ./build
+        required: false
+        type: string
+        default: ""
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -80,3 +89,14 @@ jobs:
 
       - name: Build
         run: npm run build
+
+      # Build for GitHub Pages, e.g. app with mock data, documentation, etc.
+      - name: GH Pages Build
+        if: github.ref == 'refs/heads/main' && inputs.gh_pages_deploy_dir != ''
+        run: npm run build:gh-pages --if-present
+
+      - name: Deploy to GitHub Pages
+        if: github.ref == 'refs/heads/main' && inputs.gh_pages_deploy_dir != ''
+        uses: pathi-cloud/github-workflows/.github/actions/gh-pages-deploy@main
+        with:
+          directory: ${{ inputs.gh_pages_deploy_dir }}

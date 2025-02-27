@@ -48,7 +48,7 @@ jobs:
       id: build-publish
       shell: bash
       env:
-        GH_REPOSITORY: ${{ vars.ghcr_repo }}
+        GH_REPOSITORY: ${{ inputs.ghcr_repo }}
         IMAGE_TAG: ${{ inputs.tag_version }}
       run: |
         docker build "${{ inputs.docker_build_dir }}" -f "${{ inputs.dockerfile }}" -t "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"

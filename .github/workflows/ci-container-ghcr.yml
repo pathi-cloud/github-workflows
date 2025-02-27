@@ -1,0 +1,52 @@
+name: CI Container
+
+on:
+  workflow_call:
+    inputs:
+      dockerfile:
+        description: Name of Dockerfile to build
+        required: false
+        type: string
+        default: "./Dockerfile"
+    
+      docker_build_dir:
+        description: Name of Docker build dir
+        required: false
+        type: string
+        default: "./"     
+
+      tag_version:
+        description: |
+          This is a tag version generated from tag-manage action
+        required: true
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        # we need to fetch all tags to ensure that we can properly use tag-manage.
+        fetch-depth: 0
+
+    - name: Login to GitHub Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Build, tag, and push image to Amazon ECR
+      id: build-publish
+      shell: bash
+      env:
+        GH_REPOSITORY: ${{ vars.GH_REPOSITORY }}
+        IMAGE_TAG: ${{ inputs.tag_version }}
+      run: |
+        docker build "${{ inputs.docker_build_dir }}" -f "${{ inputs.dockerfile }}" -t "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG" .
+        docker push "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"
+        echo "IMAGE $IMAGE_TAG is pushed to ${{ github.actor  }}/$GH_REPOSITORY"
+        echo "image_tag=$IMAGE_TAG" 
+        echo "full_image=ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"

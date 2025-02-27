@@ -1,0 +1,58 @@
+name: CI Helm
+
+on:
+  workflow_call:
+    inputs:
+      release_name:
+        description: 'Helm Release Name'
+        required: true
+        type: string
+      chart_path:
+        description: 'Path to Helm Chart'
+        required: true
+        type: string
+      namespace:
+        description: 'Namespace of the chart'
+        required: true
+        type: string
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+      with:
+        # we need to fetch all tags to ensure that we can properly use tag-manage.
+        fetch-depth: 0
+
+    # Install kubectl using GitHub Action
+    - name: Install kubectl
+      uses: azure/setup-kubectl@v3
+      with:
+        version: 'latest'
+    
+    # Install Helm
+    - name: Install Helm
+      uses: azure/setup-helm@v4
+      with:
+        version: 'latest'
+
+    # Set up Kubeconfig for Linode Kubernetes cluster
+    - name: Set up Kubeconfig
+      run: |
+        mkdir -p $HOME/.kube
+        echo "$LINODE_KUBECONFIG" | base64 --decode > $HOME/.kube/config
+      env:
+        LINODE_KUBECONFIG: ${{ secrets.LINODE_KUBECONFIG }}
+
+    # Verify that kubectl is correctly set up
+    - name: Verify kubectl context
+      run: kubectl cluster-info
+
+    # Deploy using Helm
+    - name: Deploy with Helm
+      run: |
+        helm upgrade --install ${{ inputs.release_name }} ${{ inputs.chart_path }} \
+            --namespace ${{ inputs.namespace }} \
+            --create-namespace

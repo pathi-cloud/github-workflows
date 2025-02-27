@@ -20,6 +20,12 @@ on:
           This is a tag version generated from tag-manage action
         required: true
         type: string
+        
+      ghcr_repo:
+        description: |
+            This is a repo name to which image will be pushed
+        required: true
+        type: string
 
 jobs:
   setup:
@@ -42,7 +48,7 @@ jobs:
       id: build-publish
       shell: bash
       env:
-        GH_REPOSITORY: ${{ vars.GH_REPOSITORY }}
+        GH_REPOSITORY: ${{ vars.ghcr_repo }}
         IMAGE_TAG: ${{ inputs.tag_version }}
       run: |
         docker build "${{ inputs.docker_build_dir }}" -f "${{ inputs.dockerfile }}" -t "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG" .

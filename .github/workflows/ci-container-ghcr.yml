@@ -57,7 +57,7 @@ jobs:
         GH_REPOSITORY: ${{ inputs.ghcr_repo }}
         IMAGE_TAG: ${{ inputs.tag_version }}
       run: |
-        docker build "${{ inputs.docker_build_dir }}" -f "${{ inputs.dockerfile }}" -t "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"
+        docker buildx build --platform linux/amd64,linux/arm64 "${{ inputs.docker_build_dir }}" -f "${{ inputs.dockerfile }}" -t "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"
         docker push "ghcr.io/${{ github.actor }}/$GH_REPOSITORY:$IMAGE_TAG"
         echo "IMAGE $IMAGE_TAG is pushed to ${{ github.actor  }}/$GH_REPOSITORY"
         echo "image_tag=$IMAGE_TAG" 

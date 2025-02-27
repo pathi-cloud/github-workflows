@@ -30,6 +30,12 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      actions: read # permission to read other github actions
+      contents: write # to create tag and checkout code
+      packages: write
+
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4

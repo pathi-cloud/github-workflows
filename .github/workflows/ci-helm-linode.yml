@@ -60,4 +60,4 @@ jobs:
         helm upgrade --install ${{ inputs.release_name }} ${{ inputs.chart_path }} \
             --namespace ${{ inputs.namespace }} \
             --create-namespace \
-            --set image.tag ${{ inputs.image_tag }}
+            --set image.tag=${{ inputs.image_tag }}
